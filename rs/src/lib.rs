@@ -1,4 +1,4 @@
-//! soft3 — the type-2 civilization software stack.
+//! cybernode — rung 7 of the soft3 ladder: the node. moved from the `soft3` crate on 2026-10-27 (soft3/proposals/cybernode.md); the code is unchanged, the wire identifiers (`soft3/chain/…/v1`) and the home directories keep their names.
 //!
 //! - [[network]] — spacepussy-test product network (soft3 chaosnet)
 //! - [[node]] — real soft3-node over cybergraph + bbg
@@ -6,12 +6,13 @@
 //! - [[wallet]] — sign and submit phase-1 root chain transactions (specs/chain.md)
 //! - [[chain]] — the phase-1 proof-of-work root chain kernel (specs/chain.md);
 //!   `chain::mine` is the reference miner with CPU, Metal and WebGPU backends
-//! - CLI: `soft3 sync`, `soft3 node`, `soft3 network`, `soft3 genesis`, `soft3 mine`
+//! - CLI: `cybernode sync`, `cybernode run` (`node`), `cybernode network`, `cybernode genesis`, `cybernode mine`
 //!
 //! Default network: **spacepussy-test** at `https://cyb.ai/spacepussy-test`
 //! (cybernode). Not the cosmos-sdk chain `space-pussy`.
 
 pub mod chain;
+pub mod cli;
 pub mod genesis;
 pub mod network;
 pub mod node;
@@ -20,7 +21,7 @@ pub mod wallet;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn identity() -> &'static str {
-    "soft3"
+    "cybernode"
 }
 
 pub fn default_network() -> network::Network {
@@ -36,9 +37,6 @@ pub fn manifesto() -> &'static [&'static str] {
         "default network: spacepussy-test (soft3 chaosnet)",
     ]
 }
-
-#[cfg(feature = "stack")]
-pub use cyb;
 
 #[cfg(test)]
 mod tests {

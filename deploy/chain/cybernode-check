@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# soft3-chain-check — health of one soft3 root-chain instance on this machine.
+# cybernode-check — health of one soft3 root-chain instance on this machine.
 #
-#   soft3-chain-check pussy            # full check, one line per probe, exit 0 ok / 1 degraded / 2 down
-#   soft3-chain-check --pre pussy      # ExecStartPre gate: clock synchronized, disk, env sanity (no HTTP)
-#   soft3-chain-check --json pussy     # same checks, one JSON object on stdout
+#   cybernode-check pussy            # full check, one line per probe, exit 0 ok / 1 degraded / 2 down
+#   cybernode-check --pre pussy      # ExecStartPre gate: clock synchronized, disk, env sanity (no HTTP)
+#   cybernode-check --json pussy     # same checks, one JSON object on stdout
 #
-# Install: sudo install -m 0755 soft3-chain-check /usr/local/bin/
-# Cron:    */5 * * * * cyber /usr/local/bin/soft3-chain-check pussy >> /var/log/soft3-chain/check-pussy.log 2>&1
+# Install: sudo install -m 0755 cybernode-check /usr/local/bin/
+# Cron:    */5 * * * * cyber /usr/local/bin/cybernode-check pussy >> /var/log/cybernode/check-pussy.log 2>&1
 #
 # What "healthy" means here (assumptions from the spec in progress, specs/chain.md — see README.md):
 #   /health answers 200 within 2 s           the process accepts connections
@@ -24,7 +24,7 @@ case "${1:-}" in
   --json) mode=json; shift ;;
 esac
 chain="${1:-}"
-[[ -n "$chain" ]] || { echo "usage: soft3-chain-check [--pre|--json] <chain>" >&2; exit 2; }
+[[ -n "$chain" ]] || { echo "usage: cybernode-check [--pre|--json] <chain>" >&2; exit 2; }
 
 env_file="/etc/soft3/$chain.env"
 [[ -r "$env_file" ]] || { echo "DOWN env: missing $env_file"; exit 2; }
@@ -36,7 +36,7 @@ source "$env_file"
 stale_secs="${SOFT3_STALE_SECS:-600}"
 min_disk_gib="${SOFT3_MIN_DISK_GIB:-5}"
 home="/var/lib/soft3/$chain"
-unit="soft3-chain@$chain"
+unit="cybernode@$chain"
 radio_port="${SOFT3_RADIO##*:}"
 worst=0
 declare -a lines

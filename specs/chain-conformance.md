@@ -362,7 +362,7 @@ written by `soft3 conformance bless chain` into `conformance/chain.snap`
 (and checked by `soft3 conformance check chain`); the genesis entries of
 §10 need the genesis file (`--genesis FILE`, default
 `~/.cache/cyber/genesis/pussy.tade`) and are kept as they are when it is
-absent. They are reviewed in the PR that moves them. The report of each run goes to `soft3/audit/chain/conformance-<date>.md`
+absent. They are reviewed in the PR that moves them. The report of each run goes to `cybernode/audit/chain/conformance-<date>.md`
 with the revision and the command, per the audit doctrine.
 
 ## 14. the focus economy

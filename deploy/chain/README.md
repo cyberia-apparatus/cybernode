@@ -4,25 +4,25 @@ Runbook for running `soft3 node` as the proof-of-work root chain (decision
 2026-10-15, cyber/launch.md; genesis 2026-11-05) on cyberproxy, deimos and
 jupiter, node-to-node over cyber-radio (QUIC/UDP) and the HTTP API behind
 the existing nginx. Prepared 2026-10-15 while the chain spec
-(`soft3/specs/chain.md`) is still being written; § assumptions lists what
+(`cybernode/specs/chain.md`) is still being written; § assumptions lists what
 this runbook takes from the spec and must be re-checked when it lands.
 Nothing here starts a service by itself.
 
-Machine facts behind every number: `cybernode/servers/<host>/inventory-2026-10-15.md`.
+Machine facts behind every number: `apparatus/servers/<host>/inventory-2026-10-15.md`.
 
 ## files
 
 | file | installs to | role |
 |--|--|--|
-| `soft3-chain@.service` | `/etc/systemd/system/` | one unit per chain instance (`soft3-chain@pussy`, `soft3-chain@bostrom`) |
+| `cybernode@.service` | `/etc/systemd/system/` | one unit per chain instance (`cybernode@pussy`, `cybernode@bostrom`) |
 | `chain.env.example` | `/etc/soft3/<chain>.env` | the instance parameters (bind, radio port, moniker, thresholds) |
-| `limits.conf.example` | `/etc/systemd/system/soft3-chain@<chain>.service.d/limits.conf` | per-machine MemoryMax drop-in |
+| `limits.conf.example` | `/etc/systemd/system/cybernode@<chain>.service.d/limits.conf` | per-machine MemoryMax drop-in |
 | `peers.toml.example` | `/etc/soft3/<chain>.peers.toml` | bootstrap peers, format v1 |
-| `nginx-chain-api.conf.template` | `/etc/nginx/snippets/soft3-chain-<chain>.conf` | HTTP API behind TLS with an in-flight cap |
+| `nginx-chain-api.conf.template` | `/etc/nginx/snippets/cybernode-<chain>.conf` | HTTP API behind TLS with an in-flight cap |
 | `ufw-chain.sh` | run by hand | open/close the radio UDP port, logged |
-| `soft3-chain-check` | `/usr/local/bin/` | health check: ExecStartPre gate, cron probe, JSON |
-| `logrotate-soft3-chain` | `/etc/logrotate.d/soft3-chain` | rotation of the check/ufw logs |
-| `journald-soft3-chain.conf` | `/etc/systemd/journald.conf.d/` | journal cap for the node's own logs |
+| `cybernode-check` | `/usr/local/bin/` | health check: ExecStartPre gate, cron probe, JSON |
+| `logrotate-cybernode` | `/etc/logrotate.d/cybernode` | rotation of the check/ufw logs |
+| `journald-cybernode.conf` | `/etc/systemd/journald.conf.d/` | journal cap for the node's own logs |
 | `../../scripts/chain-fleet.nu` | dev machine | three nodes on one machine, the rehearsal |
 
 ## layout
@@ -48,15 +48,15 @@ Machine facts behind every number: `cybernode/servers/<host>/inventory-2026-10-1
    (or copy the release binary to `/home/cyber/.cargo/bin/soft3`). Confirm
    `soft3 node --help` lists `--chain --radio --peers`; the unit will not work
    with the 0.10.0 flag set.
-2. Directories: `sudo mkdir -p /etc/soft3 /var/log/soft3-chain && sudo chown cyber:adm /var/log/soft3-chain`.
+2. Directories: `sudo mkdir -p /etc/soft3 /var/log/cybernode && sudo chown cyber:adm /var/log/cybernode`.
    On deimos/jupiter first `sudo mkdir -p /mnt/<big>/soft3 && sudo chown cyber:cyber /mnt/<big>/soft3 && sudo ln -s /mnt/<big>/soft3 /var/lib/soft3`.
 3. Parameters: `sudo cp chain.env.example /etc/soft3/pussy.env`, edit bind/radio/moniker/MemoryMax
    from the table; `sudo chmod 0640 /etc/soft3/pussy.env && sudo chgrp cyber /etc/soft3/pussy.env`.
-4. Check script and unit: `sudo install -m 0755 soft3-chain-check /usr/local/bin/`,
-   `sudo cp soft3-chain@.service /etc/systemd/system/`, the MemoryMax drop-in from `limits.conf.example` (value from the table), `sudo systemctl daemon-reload`.
-   Run `soft3-chain-check --pre pussy` — clock, disk and env must be OK.
-5. Logs: `sudo cp logrotate-soft3-chain /etc/logrotate.d/soft3-chain`,
-   `sudo mkdir -p /etc/systemd/journald.conf.d && sudo cp journald-soft3-chain.conf /etc/systemd/journald.conf.d/ && sudo systemctl restart systemd-journald`.
+4. Check script and unit: `sudo install -m 0755 cybernode-check /usr/local/bin/`,
+   `sudo cp cybernode@.service /etc/systemd/system/`, the MemoryMax drop-in from `limits.conf.example` (value from the table), `sudo systemctl daemon-reload`.
+   Run `cybernode-check --pre pussy` — clock, disk and env must be OK.
+5. Logs: `sudo cp logrotate-cybernode /etc/logrotate.d/cybernode`,
+   `sudo mkdir -p /etc/systemd/journald.conf.d && sudo cp journald-cybernode.conf /etc/systemd/journald.conf.d/ && sudo systemctl restart systemd-journald`.
 6. nginx (cyberproxy, deimos): declare the zone once in `http{}`
    (`limit_conn_zone $server_name zone=soft3_chain_pussy:1m;`), render the
    snippet (`sed` line in the template), include it in the 443 server block,
@@ -79,7 +79,7 @@ Machine facts behind every number: `cybernode/servers/<host>/inventory-2026-10-1
    `audit/chain/net-2026-10-15.md`, `audit/chain/slice-2026-10-16.md`).
 2. Same three steps on the machines with `SOFT3_CHAIN=pussy-rc` (the launch
    allow-list has it) on ports 7783/7793 if a dress rehearsal on real hosts is
-   wanted; tear down with `systemctl disable --now soft3-chain@pussy-rc`
+   wanted; tear down with `systemctl disable --now cybernode@pussy-rc`
    and `ufw-chain.sh close pussy-rc`.
 
 ### C. genesis day (2026-11-05)
@@ -89,37 +89,37 @@ Order matters only for the peers' first dial; start the best box first.
 | T | where | command | verify |
 |--|--|--|--|
 | T−60 min | all | `sudo ./ufw-chain.sh open pussy` | `ufw status` shows `7791/udp ALLOW IN Anywhere` |
-| T−30 min | all | `soft3-chain-check --pre pussy` | all OK; clocks within ms (timesyncd offsets were −2.8 ms / −71 µs / −19 µs on 10-15) |
+| T−30 min | all | `cybernode-check --pre pussy` | all OK; clocks within ms (timesyncd offsets were −2.8 ms / −71 µs / −19 µs on 10-15) |
 | T−15 min | all | put the final `genesis.json` in `/var/lib/soft3/pussy/` | identical sha256 on the three machines |
-| T | deimos | `sudo systemctl enable --now soft3-chain@pussy` | `journalctl -u soft3-chain@pussy -f` shows listening + radio bound; `soft3-chain-check pussy` |
-| T+1 min | jupiter | `systemctl --user` is not enough for a system unit — root runs `systemctl enable --now soft3-chain@pussy` | check as above; `/status` must show deimos as a peer |
-| T+2 min | cyberproxy | `sudo systemctl enable --now soft3-chain@pussy` | three peers each |
+| T | deimos | `sudo systemctl enable --now cybernode@pussy` | `journalctl -u cybernode@pussy -f` shows listening + radio bound; `cybernode-check pussy` |
+| T+1 min | jupiter | `systemctl --user` is not enough for a system unit — root runs `systemctl enable --now cybernode@pussy` | check as above; `/status` must show deimos as a peer |
+| T+2 min | cyberproxy | `sudo systemctl enable --now cybernode@pussy` | three peers each |
 | T+5 min | cyberproxy, deimos | `sudo nginx -t && sudo systemctl restart nginx` (restart, not reload — see servers/CLAUDE.md) | `curl -s https://cyb.ai/pussy/status` |
 | T+10 min | dev machine | `cy net add pussy https://cyb.ai/pussy` on a cyb body | the body's networks row shows the height advancing |
-| T+1 h | all | `soft3-chain-check pussy` | `progress` OK — height moved |
+| T+1 h | all | `cybernode-check pussy` | `progress` OK — height moved |
 | T+1 day | — | repeat for `bostrom` on 7782/7792 | |
 
-Rollback at any step: `sudo systemctl disable --now soft3-chain@pussy`,
+Rollback at any step: `sudo systemctl disable --now cybernode@pussy`,
 `sudo ./ufw-chain.sh close pussy`, remove the nginx include and restart
 nginx. The state directory is kept for post-mortem.
 
 ### D. operating
 
-- `soft3-chain-check pussy` by hand or from cron every 5 min, output to
-  `/var/log/soft3-chain/check-pussy.log` (rotated daily × 30).
-- Logs: `journalctl -u soft3-chain@pussy` (journal capped at 1 GB).
-- Restart: `sudo systemctl restart soft3-chain@pussy` — the unit refuses to
+- `cybernode-check pussy` by hand or from cron every 5 min, output to
+  `/var/log/cybernode/check-pussy.log` (rotated daily × 30).
+- Logs: `journalctl -u cybernode@pussy` (journal capped at 1 GB).
+- Restart: `sudo systemctl restart cybernode@pussy` — the unit refuses to
   start when the clock is not NTP-synchronized (`ExecStartPre`).
 - Peers file edits need a restart; the file is read at start.
 - Thread count is a check: the 0.10.0 chaosnet node reached 1,800 threads on
   2026-10-15 because each request took the state mutex for ~12 s and nginx let
   abandoned clients keep their upstream thread (incident:
-  `cybernode/servers/cyberproxy/spacepussy-test.md`). The snippet's
+  `apparatus/servers/cyberproxy/spacepussy-test.md`). The snippet's
   `limit_conn 32` and the unit's `TasksMax=2048` are the guards.
 
 ## assumptions taken from the spec in progress
 
-Re-verify every row against `soft3/specs/chain.md` when it merges; each one
+Re-verify every row against `cybernode/specs/chain.md` when it merges; each one
 is a parameter or a line in one file above.
 
 | assumption | where it lands |

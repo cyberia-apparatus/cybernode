@@ -13,7 +13,7 @@
 #
 # The node dials every peer at start, keeps the connection alive, and learns further
 # peers over gossip; the file is the floor, never the ceiling. Edit, then
-# `systemctl restart soft3-chain@<chain>` — the file is read at start only.
+# `systemctl restart cybernode@<chain>` — the file is read at start only.
 
 version = 1
 chain = "pussy"

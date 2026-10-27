@@ -18,10 +18,10 @@ use iroh_gossip::proto::TopicId;
 use radio::endpoint::Connection;
 use radio::protocol::{AcceptError, ProtocolHandler, Router};
 use radio::{Endpoint, EndpointAddr, EndpointId, SecretKey, TransportAddr};
-use soft3::chain::net::codec::{self, hex, topic_id, unhex32, Header};
-use soft3::chain::params::POW_LIMIT_BITS;
-use soft3::chain::net::frames::{Frame, Status, DIALECT, ERR_LIMIT, ERR_WRONG_CHAIN};
-use soft3::chain::net::transport::{self, read_frame, request, write_frame, ALPN};
+use cybernode::chain::net::codec::{self, hex, topic_id, unhex32, Header};
+use cybernode::chain::params::POW_LIMIT_BITS;
+use cybernode::chain::net::frames::{Frame, Status, DIALECT, ERR_LIMIT, ERR_WRONG_CHAIN};
+use cybernode::chain::net::transport::{self, read_frame, request, write_frame, ALPN};
 
 struct NodeProc {
     child: Child,
@@ -145,12 +145,12 @@ fn next_bits(node: &NodeProc) -> u32 {
 }
 
 fn pow_ok(h: &Header) -> bool {
-    soft3::chain::pow::valid_pow(&soft3::chain::header::Header::decode_raw(&h.encode()).unwrap())
+    cybernode::chain::pow::valid_pow(&cybernode::chain::header::Header::decode_raw(&h.encode()).unwrap())
 }
 
 /// Solve a header with the reference miner's CPU backend.
 fn solve(h: Header) -> Header {
-    use soft3::chain::mine::{cpu::Cpu, target::target_of, Backend, Job};
+    use cybernode::chain::mine::{cpu::Cpu, target::target_of, Backend, Job};
     let job = Job::new(&h.encode(), target_of(h.bits).unwrap());
     let cpu = Cpu::new(0);
     let mut base = 0u128;
@@ -326,7 +326,7 @@ fn gossip_is_policed_and_bad_blocks_are_scored() {
         let tip_id = unhex32(tip["id"].as_str().unwrap()).unwrap();
         let height = tip["height"].as_u64().unwrap();
         let bogus = Header {
-            version: 1, height: height + 1, time: soft3::chain::net::now_unix(), bits: next_bits(&node), nonce: [0xff; 16],
+            version: 1, height: height + 1, time: cybernode::chain::net::now_unix(), bits: next_bits(&node), nonce: [0xff; 16],
             prev: tip_id, tx_root: [3; 32], state_root: [4; 32], chain,
         };
         let bogus = (0u8..=255).map(|n| Header { nonce: [n; 16], ..bogus }).find(|h| !pow_ok(h)).expect("a 2^-20 target fails almost every nonce");
@@ -353,7 +353,7 @@ fn gossip_is_policed_and_bad_blocks_are_scored() {
         let tip_id = unhex32(tip["id"].as_str().unwrap()).unwrap();
         let height = tip["height"].as_u64().unwrap();
         let candidate = Header {
-            version: 1, height: height + 1, time: soft3::chain::net::now_unix() + 5, bits: next_bits(&node), nonce: [0; 16],
+            version: 1, height: height + 1, time: cybernode::chain::net::now_unix() + 5, bits: next_bits(&node), nonce: [0; 16],
             prev: tip_id, tx_root: [3; 32], state_root: [4; 32], chain,
         };
         let solved = solve(candidate);

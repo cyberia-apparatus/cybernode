@@ -17,8 +17,8 @@ env_file="/etc/soft3/$chain.env"
 source "$env_file"
 port="${SOFT3_RADIO##*:}"
 [[ "$port" =~ ^[0-9]+$ && "$port" -ge 1024 && "$port" -le 65535 ]] || { echo "SOFT3_RADIO has no sane port: '$SOFT3_RADIO'" >&2; exit 2; }
-comment="soft3-chain-$chain-radio"
-log="/var/log/soft3-chain/ufw.log"
+comment="cybernode-$chain-radio"
+log="/var/log/cybernode/ufw.log"
 mkdir -p "$(dirname "$log")"
 
 present() { ufw status | grep -qE "^$port/udp\s+ALLOW IN\s+Anywhere" ; }

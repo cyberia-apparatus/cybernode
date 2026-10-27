@@ -5,13 +5,13 @@
 //! answers `409` to a header of the old tip, and drops the first template
 //! request so the client's retry is exercised.
 
-use soft3::chain::header::encode_bits;
-use soft3::chain::mine::api::{hex, unhex, Accepted, Submit, Template, Tip};
-use soft3::chain::mine::run::{mine_template, Outcome, Settings};
-use soft3::chain::mine::target::{target_of, to_bytes, verifies};
-use soft3::chain::mine::{api::Client, select, Choice};
-use soft3::chain::params::POW_LIMIT_BITS;
-use soft3::chain::u256::U256;
+use cybernode::chain::header::encode_bits;
+use cybernode::chain::mine::api::{hex, unhex, Accepted, Submit, Template, Tip};
+use cybernode::chain::mine::run::{mine_template, Outcome, Settings};
+use cybernode::chain::mine::target::{target_of, to_bytes, verifies};
+use cybernode::chain::mine::{api::Client, select, Choice};
+use cybernode::chain::params::POW_LIMIT_BITS;
+use cybernode::chain::u256::U256;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering::Relaxed};

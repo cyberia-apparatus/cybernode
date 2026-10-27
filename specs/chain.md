@@ -1379,7 +1379,7 @@ rented-hash-rate rehearsal (one GPU box) produces a reorg that the reorg
 limit and checkpoints bound as specified, every node agrees on every epoch
 record of the 24 h run and settles bostrom's graph within `SETTLE_BUDGET`
 (chain-economy §10), and cyb reads the chain through the HTTP surface of
-chain-wire §6. Receipts go to `soft3/audit/chain/`.
+chain-wire §6. Receipts go to `cybernode/audit/chain/`.
 
 See [chain-wire](chain-wire.md) for the network, [chain-conformance](chain-conformance.md)
 for the vectors, [native-node](native-node.md) for the HTTP acceptance contract
